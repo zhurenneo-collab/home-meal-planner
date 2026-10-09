@@ -35,7 +35,7 @@
 
 当前统一入口是 `index.html`，同一套响应式页面适配电脑与 iPhone；不再单独维护手机版副本。仓库内的 `.github/workflows/pages.yml` 使用 GitHub 官方 Pages Actions，在推送到 `main` 后自动部署；部署只发布入口页面和图标/manifest 资源。仓库首次启用时，在 GitHub 仓库的 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
 
-若用 GitHub Free，Pages 需要公开仓库。公开前请确认：仓库内的 HTML 源码、菜品数据和内嵌生成图片都可被公众查看。项目不含后端密钥；当前检查未发现 API key、token、私钥或环境配置文件。仓库公开后，项目地址通常为 `https://<GitHub用户名>.github.io/<仓库名>/`。Pages 构建与首次上线由 GitHub Actions 完成。
+本项目已部署在公开仓库，源码、菜品数据和内嵌生成图片都可被公众查看。正式网址是 `https://zhurenneo-collab.github.io/home-meal-planner/`。项目不含后端密钥；当前检查未发现 API key、token、私钥或环境配置文件。`.github/workflows/pages.yml` 会在推送到 `main` 后通过 GitHub Actions 更新站点。
 
 在 iPhone 上用 Safari 打开 HTTPS 网站，点“分享”→“添加到主屏幕”；可选择“作为 Web App 打开”。本页包含 iOS Web App 元数据、主屏幕图标和轻量 manifest，不依赖 PWA 框架。相关选项以当前 iOS/Safari 版本为准。
 
