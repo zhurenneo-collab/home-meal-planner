@@ -1,0 +1,14 @@
+{
+  "id": "./",
+  "name": "今天吃什么 · 家庭菜单规划器",
+  "short_name": "今天吃什么",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#f7f7f2",
+  "icons": [
+    { "src": "app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
