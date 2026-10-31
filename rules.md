@@ -32,11 +32,11 @@
 
 ## 数据结构与迁移
 
-主存储键为 `home-meal-planner-v1`。稳定性版本使用 `schemaVersion: 2`，保存结构包含：
+主存储键为 `home-meal-planner-v1`。当前数据版本使用 `schemaVersion: 3`，保存结构包含：
 
 ```json
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "dishes": [],
   "history": [
     { "date": "2026-10-12", "combo": "m001|v001|s001", "day": { "date": "2026-10-12", "meat": "m001", "vegetable": "v001", "soup": "s001" } }
@@ -44,13 +44,17 @@
   "confirmed": [
     { "date": "2026-10-12", "day": { "date": "2026-10-12", "meat": "m001", "vegetable": "v001", "soup": "s001" }, "savedAt": "ISO-8601 时间", "batchId": "保存批次", "saveOrder": 1 }
   ],
-  "current": { "count": 5, "startDate": "2026-10-12", "days": [] }
+  "current": { "count": 5, "startDate": "2026-10-12", "days": [] },
+  "menuCache": { "2026-10-12": { "count": 5, "days": [] } },
+  "orders": [
+    { "id": "order-...", "requestedDate": "2026-10-12", "createdAt": "ISO-8601 时间", "note": "少盐", "items": [{ "dishId": "m001", "quantity": 1 }] }
+  ]
 }
 ```
 
-旧版 `confirmed` 中按周保存的 `days` 会展开为按日期记录；旧 `history` 中有完整菜单的日期也会恢复。内置菜品以当前内置种子为准，旧记录的菜名、ID、类别和用户偏好会合并；缺少的内置菜会补齐，自定义菜品及收藏、启用、排除状态会保留。遇到黄瓜菜按既定忌口排除。迁移前先将原始 localStorage 字符串备份到 `home-meal-planner-v1-backup-before-stability-v1`；备份不可写时停止写入迁移结果。导入前也先创建独立备份，并且先验证全部数据，校验或持久化失败时保留原状态。
+升级到 schema 3 时按新备份键保留原始 localStorage 字符串。`menuCache` 以周一日期为键保留最近12个预览周；刷新时按本机日期选择当周缓存，没有缓存就生成当周。切换周时先恢复有效缓存，否则按当前规则重新生成。`orders` 保存最近50笔本地点菜订单，菜品引用中的自定义菜不可直接删除。`activeView` 记录当前菜单/点菜视图；旧 `order.html` 仅作为兼容跳转入口，实际功能由 `index.html` 统一提供。旧版 `confirmed` 中按周保存的 `days` 会展开为按日期记录；旧 `history` 中有完整菜单的日期也会恢复。内置菜品以当前内置种子为准，旧记录的菜名、ID、类别和用户偏好会合并；缺少的内置菜会补齐，自定义菜品及收藏、启用、排除状态会保留。遇到黄瓜菜按既定忌口排除。升级到 schema 3 前先将原始 localStorage 字符串备份到独立备份键 `home-meal-planner-v1-backup-before-schema-3-*`；备份不可写时停止写入迁移结果。导入前也先创建独立备份，并且先验证全部数据，校验或持久化失败时保留原状态。
 
-导入校验包括 JSON 根结构、重复/非法 ID、自定义菜品必需字段和字段范围、内置类别一致性、历史日期、已确认菜单完整性及当前预览硬规则。自定义菜品名称、食材和提示限制长度与类型；删除前检查当前预览及已确认菜单引用。所有动态文本写入 HTML 前进行转义。
+导入校验包括 JSON 根结构、重复/非法 ID、自定义菜品必需字段和字段范围、内置类别一致性、历史日期、已确认菜单完整性、当前预览和周缓存硬规则，以及订单项目引用和份数。自定义菜品名称、食材和提示限制长度与类型；删除前检查当前预览及已确认菜单引用。所有动态文本写入 HTML 前进行转义。
 
 ## 主要实现函数
 
@@ -63,7 +67,11 @@
 | `toggleLock` / `normalizeLocksForMenu` | 维护整日与单槽锁定语义 |
 | `regenerate` | 暂存并校验结果，通过后才替换当前菜单 |
 | `saveCurrentMenu` / `historyRecords` | 按日期 upsert 确认菜单并从同一记录集派生历史 |
-| `migrateStateData` / `loadState` / `persist` | 旧数据合并、迁移备份和安全写入 |
+| `migrateStateData` / `loadState` / `persist` | 旧数据合并、迁移备份、菜单周缓存和安全写入 |
+| `selectMenuWeek` / `menuCache` | 按本机当前周恢复预览；用户切换过的周菜单按周一日期缓存 |
+| `openOrderPage` / `acceptOrder` / `renderOrders` | 在单页应用内切换点菜视图、校验本机订单并呈现最近记录；点菜清单复用菜品库生成图，订单写入同一 localStorage 状态 |
+| `renderManagedOrders` / `changeOrderQuantity` / `beginAddDishToOrder` / `submitOrderSelection` | 呈现下单历史；从订单进入选菜页时带回原日期、备注和菜品份数，确认后更新原订单；每道菜最多20份 |
+| `askDeleteOrder` / `confirmDeleteOrder` / `persistOrderMutation` | 通过可取消的确认框删除整单；订单写入失败时恢复原记录 |
 | `validateDishInput` / `dishIsReferenced` | 自定义菜品验证与删除引用检查 |
 | `validateImportedPayload` / `importData` | 导入预校验、写入前备份与失败回滚 |
 
@@ -80,3 +88,12 @@
 7. 自定义菜品字段及制作时间验证、HTML 转义和删除引用检查。
 
 回归结果：以上场景均通过。内置120道菜、内嵌生成图、图片 ID 映射和 CSS 样式与修复前备份相同。
+
+
+## 多设备云同步规则
+
+- Supabase 只保存当前账号的一份 `app_state`，包括周缓存、已确认菜单、用户菜品配置和点菜订单；登录会话与版本标记保存在各设备本机，不进入 JSON 导出或云端应用状态。
+- 每次写入都携带上次读取到的 `updated_at` 版本。数据库函数仅接受当前用户自己的行，并要求版本一致；并发设备保存时拒绝覆盖，页面要求用户选择云端或本机版本。
+- 首次连接遇到云端和本机各有内容时要求手动选边；替换本机前先保留本地备份。新设备无本地用户数据时读取云端状态。
+- Supabase 表启用 RLS，`auth.uid()` 必须匹配行主键。页面只使用 publishable/anon key，不使用具有绕过 RLS 权限的 service role key。
+- 离线操作先写本地 localStorage，联网或页面恢复可见时尝试同步。云端请求失败不撤销本地菜单或订单。
