@@ -53,7 +53,7 @@
 
 1. 在 Supabase 创建免费项目，在 Dashboard 的 SQL Editor 执行仓库中的 `supabase.sql`。脚本建立每账号一行的数据表，并启用 RLS；普通匿名访问不能读取菜单数据。
 2. 在 Supabase 的 Authentication > URL Configuration 配置允许的站点地址（GitHub Pages 地址），并按需配置 Email OTP。
-3. 从 Project Settings > API 复制 Project URL 和 anon/publishable key。仅将这两个公开客户端值填入 `index.html` 的 `SUPABASE_URL` 与 `SUPABASE_ANON_KEY` 常量。**不要使用或提交 service_role key。**
+3. 部署工作流会把公开的 Project URL 和 publishable key 注入 GitHub Pages 构建产物；离线版可在 `index.html` 中配置这两个常量。publishable key 本来就会公开给浏览器使用。**不要使用或提交 service_role/secret key。**
 4. 提交并推送到 `main`，GitHub Pages 工作流会重新部署。访问页面点“多设备同步”，使用同一邮箱分别登录各设备。
 5. 首次登录若本机与云端都有数据，页面会要求选择保留哪一份；覆盖本机前会自动备份当前 localStorage 数据。可随时使用“导出数据”再额外保存 JSON 备份。
 

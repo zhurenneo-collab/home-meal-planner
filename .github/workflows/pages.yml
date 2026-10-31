@@ -26,9 +26,21 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Prepare site files
+        env:
+          SUPABASE_URL: https://psuwifqhwvzujzlxnykq.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_mQxf63oT6WUFeESi3bGBhA_mpNSuEjn
         run: |
           mkdir -p _site
           cp index.html site.webmanifest apple-touch-icon.png app-icon-512.png _site/
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          page = Path('_site/index.html')
+          html = page.read_text(encoding='utf-8')
+          html = html.replace('__SUPABASE_URL__', os.environ['SUPABASE_URL'])
+          html = html.replace('__SUPABASE_ANON_KEY__', os.environ['SUPABASE_PUBLISHABLE_KEY'])
+          page.write_text(html, encoding='utf-8')
+          PY
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
