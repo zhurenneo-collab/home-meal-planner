@@ -32,6 +32,8 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html site.webmanifest apple-touch-icon.png app-icon-512.png _site/
+          mkdir -p _site/assets/brand
+          cp assets/brand/*.png _site/assets/brand/
           python3 - <<'PY'
           import os
           from pathlib import Path
