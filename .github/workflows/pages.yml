@@ -31,11 +31,12 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: sb_publishable_mQxf63oT6WUFeESi3bGBhA_mpNSuEjn
         run: |
           mkdir -p _site
-          cp index.html order.html site.webmanifest apple-touch-icon.png app-icon-512.png _site/
-          mkdir -p _site/assets/brand _site/assets/dishes
+          cp index.html order.html family-sync.js site.webmanifest apple-touch-icon.png app-icon-512.png _site/
+          mkdir -p _site/assets/brand _site/assets/dishes _site/assets/vendor
           cp assets/brand/app-logo-small.png assets/brand/menu-banner-mobile.jpg assets/brand/order-banner-mobile.jpg _site/assets/brand/
           cp assets/brand/app-logo.png _site/assets/brand/
           cp assets/dishes/*.jpg _site/assets/dishes/
+          cp assets/vendor/* _site/assets/vendor/
           python3 - <<'PY'
           import os
           from pathlib import Path
