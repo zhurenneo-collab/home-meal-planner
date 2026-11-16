@@ -23,7 +23,7 @@
 ## 说明
 
 - 每份热量是按常见食材参考值与默认份量粗略估算的约值，不是营养分析或医疗建议。
-- 图片为内嵌生成图片，离线可显示。内置菜品和图片内容保持不变；菜单页和点菜页共用同一菜品图片并可离线运行。
+- 图片为独立的压缩图片资源，按需加载；菜单页和点菜页共用图片。直接本地使用时须保留整个 assets 目录。网站首次访问需要网络，未缓存图片在离线时不保证显示；菜单文字与本地数据不依赖图片加载。
 - 项目文件：`index.html`（唯一的桌面与手机响应式入口；点菜页已并入）、`rules.md`（规则和存储说明）。
 - 生成结果是家常搭配建议。过敏或忌口食材应在菜品库排除，并在烹饪前再次确认。
 
@@ -34,9 +34,9 @@
 
 ## GitHub Pages 与手机使用
 
-当前统一入口是 `index.html`，同一套响应式页面适配电脑与 iPhone；不再单独维护手机版副本。仓库内的 `.github/workflows/pages.yml` 使用 GitHub 官方 Pages Actions，在推送到 `main` 后自动部署；部署只发布入口页面和图标/manifest 资源。仓库首次启用时，在 GitHub 仓库的 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+当前统一入口是 `index.html`，同一套响应式页面适配电脑与 iPhone；不再单独维护手机版副本。仓库内的 `.github/workflows/pages.yml` 使用 GitHub 官方 Pages Actions，在推送到 `main` 后自动部署；部署发布入口页面、菜图、品牌图片及图标/manifest 资源。仓库首次启用时，在 GitHub 仓库的 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
 
-本项目已部署在公开仓库，源码、菜品数据和内嵌生成图片都可被公众查看。正式网址是 `https://zhurenneo-collab.github.io/home-meal-planner/`。项目不含后端密钥；当前检查未发现 API key、token、私钥或环境配置文件。`.github/workflows/pages.yml` 会在推送到 `main` 后通过 GitHub Actions 更新站点。
+本项目已部署在公开仓库，源码、菜品数据和生成图片都可被公众查看。正式网址是 `https://zhurenneo-collab.github.io/home-meal-planner/`。项目不含后端密钥；当前检查未发现 API key、token、私钥或环境配置文件。`.github/workflows/pages.yml` 会在推送到 `main` 后通过 GitHub Actions 更新站点。
 
 在 iPhone 上用 Safari 打开 HTTPS 网站，点“分享”→“添加到主屏幕”；可选择“作为 Web App 打开”。本页包含 iOS Web App 元数据、主屏幕图标和轻量 manifest，不依赖 PWA 框架。相关选项以当前 iOS/Safari 版本为准。
 
@@ -61,3 +61,14 @@
 
 
 订单历史中的“添加菜品”会进入选菜页面，并带入原订单的日期、备注和已选菜品。确认后更新原订单，保留原下单时间，不会额外创建重复订单。
+
+
+## 2026-11-16 加载优化
+
+- 从 HTML 拆出内嵌菜图，改为 assets/dishes 下的独立 JPEG，保留懒加载并异步解码；图片失败不阻挡菜单文字或操作。
+- 生成小尺寸品牌图和压缩横幅，原始品牌图保留。
+- 云端请求 12 秒超时后恢复可重试状态，不再无限等待。
+- 发布必须同时包含页面及新 assets 文件，不能只上传 index.html；Pages 工作流已包含这些资源。
+- 这不能解决网络本身无法连接 GitHub Pages 的问题，也尚未验证真实 iPhone 网络。
+
+本次已运行 `python3 tests/loading_smoke.py`：JS 启动、100 份五日及 100 份二十日菜单规则、状态往返校验、图片引用和页面体积检查通过。测试使用 macOS JavaScriptCore 和模拟 DOM，不等于真实浏览器或线上验收。
