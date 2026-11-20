@@ -26,7 +26,7 @@ async function run(browser, width) {
   const before = await stateBefore();
   if (mobile) {
     const share = sender.getByRole('button',{name:'分享菜单',exact:true});
-    assert.equal(await share.innerText(),'分享菜单');
+    assert.equal(await share.innerText(),'');
     assert(await share.evaluate(el=>{
       const rect=el.getBoundingClientRect();
       return rect.width>=44 && rect.height>=44 && rect.right<=innerWidth &&
@@ -37,6 +37,9 @@ async function run(browser, width) {
   const modal = sender.locator('#menuShare');
   assert.equal(await modal.locator('.share-day').count(), 5);
   assert(await modal.locator('[data-preview]').isVisible());
+  const images=modal.locator('.share-thumbnail img');
+  assert.equal(await images.count(),15);
+  const photos=await images.evaluateAll(nodes=>nodes.map(img=>[img.getAttribute('src'),img.style.left,img.style.top]));
   const names = await modal.locator('dd').allTextContents();
   assert.equal(names[0],customName);
   const initialDate = await modal.locator('.share-day h3').first().innerText();
@@ -77,12 +80,17 @@ async function run(browser, width) {
   const open = async url=>{await page.goto(file('share.html')+new URL(url).hash)};
   await open(link);
   assert.deepEqual(await page.locator('.share-day dd').allTextContents(),names);
+  assert.deepEqual(await page.locator('.share-thumbnail img').evaluateAll(nodes=>nodes.map(img=>[img.getAttribute('src'),img.style.left,img.style.top])),photos);
   assert.equal(await page.evaluate(()=>localStorage.length),0);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth===innerWidth));
   await open(single);
   await page.waitForFunction(()=>document.querySelectorAll('.share-day').length===1);
   await page.reload();
   assert.deepEqual(await page.locator('dd').allTextContents(),names.slice(12));
+  const legacy=Buffer.from(JSON.stringify([1,[['2026-11-20','老菜名','青菜','蛋花汤']]])).toString('base64url');
+  await page.goto(file('share.html')+'#'+legacy);
+  await page.getByText('老菜名').waitFor();
+  assert.equal(await page.locator('.share-thumbnail').count(),0);
   await page.goto(file('share.html')+'#invalid');
   await page.locator('[data-actions]').waitFor({state:'hidden'});
   assert.equal(await page.locator('.share-day').count(),0);

@@ -33,3 +33,15 @@ body:has(#menuShare[open]){overflow:hidden}
 .share-segments label:has(:checked){background:white;color:#194e9e;box-shadow:0 1px 4px #2638431f;font-weight:600}
 .share-segments label:has(:focus-visible){outline:2px solid #2969cd}
 .share-segments input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.share-day dl{align-items:center}
+.share-day dd{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:3px 0}
+.share-day dd>span:first-child{min-width:0}
+.share-thumbnail{position:relative;overflow:hidden;width:58px;height:58px;flex:0 0 58px;border-radius:9px}
+.share-thumbnail img{position:absolute;max-width:none;max-height:none}
+.poster-tools{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.poster-tools a{display:inline-flex;padding:10px 14px;align-items:center;min-height:44px;box-sizing:border-box;border-radius:10px;color:#174c91;background:#edf4ff;font-size:14px;text-decoration:none}
+.share-ui [data-picture]:disabled{color:#536782;cursor:default}
+@media(max-width:700px){
+  .share-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .share-buttons button{width:100%}
+}
