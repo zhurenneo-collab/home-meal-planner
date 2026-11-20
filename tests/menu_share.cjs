@@ -24,6 +24,15 @@ async function run(browser, width) {
     MealPlanner.state.dishes.find(d=>d.id===id).name=name;
   },customName);
   const before = await stateBefore();
+  if (mobile) {
+    const share = sender.getByRole('button',{name:'分享菜单',exact:true});
+    assert.equal(await share.innerText(),'分享菜单');
+    assert(await share.evaluate(el=>{
+      const rect=el.getBoundingClientRect();
+      return rect.width>=44 && rect.height>=44 && rect.right<=innerWidth &&
+        el.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2));
+    }));
+  }
   await sender.locator('#shareMenu').click();
   const modal = sender.locator('#menuShare');
   assert.equal(await modal.locator('.share-day').count(), 5);
@@ -84,5 +93,5 @@ async function run(browser, width) {
 }
 (async()=>{
   const browser=await chromium.launch({channel:'chrome',headless:true});
-  try {for(const width of [390,1440])await run(browser,width)} finally {await browser.close()}
+  try {for(const width of [320,390,1440])await run(browser,width)} finally {await browser.close()}
 })().catch(error=>{console.error(error);process.exitCode=1});
