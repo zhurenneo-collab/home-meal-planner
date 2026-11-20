@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>家庭菜单 · 今天吃什么</title>
+<link rel="icon" href="assets/brand/app-logo-small.png">
+<link rel="stylesheet" href="menu-share.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7fa}.reader{max-width:560px;margin:auto;padding:24px 18px calc(24px + env(safe-area-inset-bottom))}.reader h1{display:flex;align-items:center;gap:12px;font-size:25px;margin:0}.reader h1 img{width:36px;height:36px;border-radius:9px}.reader .share-day{margin:12px 0;padding:16px}.reader .share-actions{padding-inline:0;background:transparent}
+</style>
+</head>
+<body>
+<main class="reader share-ui"><h1><img src="assets/brand/app-logo-small.png" alt="">家庭菜单</h1><p class="share-range" data-period></p><div data-days></div>
+<div class="share-actions" data-actions hidden><div class="share-buttons"><button type="button" data-send>分享链接</button><button type="button" data-link>复制链接</button><button type="button" data-text>复制文字</button></div><p role="status" data-feedback></p><textarea data-manual hidden readonly aria-label="手动复制内容"></textarea></div>
+<noscript>请启用 JavaScript 查看这份菜单。</noscript></main>
+<script src="menu-share.js"></script>
+<script>
+function showMenu(){MenuShare.showReceived(document.querySelector('main'))}
+showMenu();
+window.addEventListener('hashchange',showMenu);
+</script>
+</body></html>
